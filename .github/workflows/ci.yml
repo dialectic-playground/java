@@ -67,6 +67,11 @@ jobs:
         if: runner.os == 'Windows'
         run: command -v make || choco install make --no-progress -y
 
+      # macOS ships GNU Make 3.81; BASE-MAKEFILE requires >= 3.82.
+      - name: Use current GNU Make (macOS)
+        if: runner.os == 'macOS'
+        run: brew install make && echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
+
       - name: Set up Java 25 (Temurin)
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
