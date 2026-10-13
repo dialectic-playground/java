@@ -54,7 +54,7 @@ toolchain:
 	python3 --version || python --version
 	make --version | head -1
 	@version="$$(java -version 2>&1)"; echo "$$version"; echo "$$version" | grep -q 'version "25' \
-		|| { echo "toolchain: expected a version matching version "25" >&2; exit 1; }
+		|| { echo 'toolchain: expected a version matching version "25' >&2; exit 1; }
 	mvn -v | head -1
 
 projects:
