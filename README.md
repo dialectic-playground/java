@@ -16,7 +16,7 @@ This repository implements the eleven projects of the
 specified to the byte by the curriculum and verified by its black-box tests on Linux, macOS,
 and Windows.
 
-**Status:** repository and toolchain ready; no projects implemented yet.
+**Status:** Implemented projects: 00-hello-world.
 
 ## Java at a glance
 
@@ -35,9 +35,27 @@ and Windows.
 | Release line | Java 25 (LTS, Eclipse Temurin) |
 | Build / package tool | Maven |
 | Container image | `maven:3-eclipse-temurin-25`, pinned by digest ([`Containerfile`](Containerfile)) |
-| Native CI | actions/setup-java (Temurin 25); Maven is preinstalled on the runners |
+| Native CI | actions/setup-java (Temurin 25, Maven repository cache) |
+| Maven | 3.10.0 via each project's Maven Wrapper (`./mvnw`, checksum-pinned), the same version as the container image |
+| Unit tests | JUnit 5 (Jupiter), run by Maven Surefire |
+| Lint | `javac -Xlint:all -Werror` and Spotless `check` (google-java-format 1.36.1) |
+| Format | Spotless `apply` (google-java-format 1.36.1) |
 
 `make toolchain` verifies that the container and native toolchains are on this release line.
+Each project's `pom.xml` pins every plugin version (Maven's equivalent of a lockfile), and the
+Maven Enforcer fails the build on any other Maven or Java release line, so the container and
+native builds use identical tools. The container image adds `unzip` (the wrapper verifies the
+checksum of the `.zip` Maven distribution) and points Maven's `user.home` at the writable cache.
+
+### Running the tools
+
+`make all` leaves each tool in the project's `target/bin/` as an executable jar with a `#!`
+line prepended (`#!/usr/bin/env -S LC_ALL=C.UTF-8 java -jar` on Linux and macOS, so the JVM
+decodes UTF-8 arguments whatever the caller's locale; `#!/usr/bin/env -S java -jar` on
+Windows). `make install` copies the jar to `$(LIBDIR)/java/<project>/` and writes a `#!/bin/sh`
+launcher to `$(BINDIR)`; `java` (25) must be on `PATH`. On Windows, run the tools from Git
+Bash or MSYS2, which honor `#!` lines. The programs re-read the UTF-16 command line on Windows,
+so non-ASCII arguments arrive intact even outside the ANSI code page.
 
 ## Layout
 
@@ -67,9 +85,9 @@ make -C 00-hello-world help   # a project's configuration and hooks
 ## Implementing a project
 
 1. Complete the project's `hld.md` and `lld.md` before writing code.
-2. Write the implementation and its unit tests under the project's `src/`, add the
-   repository's Maven configuration, and fill in `BIN_DIR` and the `DP_*` hooks in
-   the project's `Makefile`.
+2. Write the implementation and its unit tests under the project's `src/` (Maven layout:
+   `src/main/java`, `src/test/java`), copy `pom.xml`, `mvnw`, and `.mvn/` from
+   `00-hello-world`, and fill in `BIN_DIR` and the `DP_*` hooks in the project's `Makefile`.
 3. Pass `make -C <project> test` (container) and `DP_RUNTIME=local make -C <project> test`.
 4. Add the project directory to `IMPLEMENTED` in the root `Makefile`. CI then builds, lints,
    and tests it in the container and natively on all three operating systems.
