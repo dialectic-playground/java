@@ -1,5 +1,5 @@
 # Keeps GitHub Actions (SHA-pinned) and the toolchain image digest current.
-# Package ecosystems (Maven) are added when the first project's manifests exist.
+# Maven: each project's pom.xml (plugin versions and test dependencies are pinned there).
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -23,3 +23,17 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+  - package-ecosystem: maven
+    directory: /00-hello-world
+    schedule:
+      interval: weekly
+    groups:
+      maven:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
+    # The owner's tooling choice is JUnit 5 (Jupiter); moving to a new major is deliberate.
+    ignore:
+      - dependency-name: "org.junit:junit-bom"
+        update-types: ["version-update:semver-major"]

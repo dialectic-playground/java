@@ -6,7 +6,9 @@
 # project listed in IMPLEMENTED in the root Makefile.
 # - Container (podman): `make check` in the toolchain image (./Containerfile), on Linux.
 # - Native (Linux, macOS, Windows): `make check roundtrip` with DP_RUNTIME=local;
-#   toolchain: actions/setup-java (Temurin 25); Maven is preinstalled on the runners.
+#   toolchain: actions/setup-java (Temurin 25, with the Maven repository cache keyed on the
+#   projects' pom.xml); each project builds with its Maven Wrapper (./mvnw), which fetches the
+#   pinned Maven version, so the runners' preinstalled Maven is not used for builds.
 # - Shared tooling, DCO, and the required "CI result" check, as in every repository.
 #
 # Actions are pinned to full commit SHAs (organization policy); Dependabot keeps them current.
@@ -77,6 +79,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
+          cache: maven
 
       - name: make check roundtrip
         run: make check roundtrip
