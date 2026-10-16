@@ -37,9 +37,9 @@ JAR := target/dp-hello.jar
 BIN_DIR := target/bin
 
 ifeq ($(OS),Windows_NT)
-  SHEBANG := \#!/usr/bin/env -S java -jar
+SHEBANG := \#!/usr/bin/env -S java -jar
 else
-  SHEBANG := \#!/usr/bin/env -S LC_ALL=C.UTF-8 java -jar
+SHEBANG := \#!/usr/bin/env -S LC_ALL=C.UTF-8 java -jar
 endif
 
 # Where `make install` puts the payload (see the header).
