@@ -7,6 +7,9 @@
 # release line is a deliberate change (keep `make toolchain` and the native CI in step).
 FROM docker.io/library/maven:3-eclipse-temurin-25@sha256:0396dcd8cd0d46a0d2026449b714b2a5bbe53cce030975b5a41f8ffa3f5f0525
 
+# Debian keeps only the current version of each package, so apt versions cannot be pinned
+# reproducibly; the base image is pinned by digest instead.
+# hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get install -y --no-install-recommends make python3 unzip \
     && rm -rf /var/lib/apt/lists/*
